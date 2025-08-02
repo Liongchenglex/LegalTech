@@ -1,0 +1,1 @@
+"""LegalTech MVP Backend Application."""
