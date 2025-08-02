@@ -1,0 +1,113 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+env:
+  NODE_VERSION: '18'
+
+jobs:
+  test-and-lint:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        component: [frontend, backend]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+    
+    - name: Install root dependencies
+      run: npm ci
+    
+    - name: Install ${{ matrix.component }} dependencies
+      run: cd ${{ matrix.component }} && npm ci
+    
+    - name: Type check ${{ matrix.component }}
+      run: cd ${{ matrix.component }} && npm run typecheck
+    
+    - name: Lint ${{ matrix.component }}
+      run: cd ${{ matrix.component }} && npm run lint
+    
+    - name: Test ${{ matrix.component }}
+      run: cd ${{ matrix.component }} && npm test
+    
+    - name: Build ${{ matrix.component }}
+      run: cd ${{ matrix.component }} && npm run build
+
+  security-audit:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+    
+    - name: Audit dependencies
+      run: |
+        npm audit --audit-level moderate
+        cd frontend && npm audit --audit-level moderate
+        cd ../backend && npm audit --audit-level moderate
+
+  deploy-staging:
+    needs: [test-and-lint, security-audit]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm run install:all
+    
+    - name: Build applications
+      run: npm run build
+    
+    - name: Deploy to staging
+      run: echo "Deploy to staging environment"
+      # Add your staging deployment commands here
+
+  deploy-production:
+    needs: [test-and-lint, security-audit]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm run install:all
+    
+    - name: Build applications
+      run: npm run build
+    
+    - name: Deploy to production
+      run: echo "Deploy to production environment"
+      # Add your production deployment commands here

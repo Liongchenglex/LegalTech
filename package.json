@@ -1,0 +1,42 @@
+{
+  "name": "legaltech-mvp",
+  "version": "1.0.0",
+  "description": "A scalable Legal Tech MVP application",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:backend": "cd backend && npm run dev",
+    "build": "npm run build:frontend && npm run build:backend",
+    "build:frontend": "cd frontend && npm run build",
+    "build:backend": "cd backend && npm run build",
+    "test": "npm run test:frontend && npm run test:backend",
+    "test:frontend": "cd frontend && npm test",
+    "test:backend": "cd backend && npm test",
+    "lint": "npm run lint:frontend && npm run lint:backend",
+    "lint:frontend": "cd frontend && npm run lint",
+    "lint:backend": "cd backend && npm run lint",
+    "typecheck": "npm run typecheck:frontend && npm run typecheck:backend",
+    "typecheck:frontend": "cd frontend && npm run typecheck",
+    "typecheck:backend": "cd backend && npm run typecheck",
+    "install:all": "npm install && cd frontend && npm install && cd ../backend && npm install",
+    "clean": "rm -rf node_modules frontend/node_modules backend/node_modules frontend/dist backend/dist"
+  },
+  "keywords": ["legal", "tech", "mvp", "typescript", "react", "node"],
+  "author": "Liong Cheng Lex <chenglex1@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "husky": "^8.0.3",
+    "lint-staged": "^15.2.0"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": ["npm run lint", "npm run typecheck"],
+    "*.{js,jsx,ts,tsx,json,css,md}": ["prettier --write"]
+  }
+}
