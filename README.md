@@ -6,9 +6,9 @@ A scalable and maintainable Legal Technology MVP application built with modern w
 
 This is a monorepo containing:
 - **Frontend**: React + TypeScript + Vite
-- **Backend**: Node.js + Express + TypeScript
+- **Backend**: Python + FastAPI + SQLAlchemy
 - **CI/CD**: GitHub Actions
-- **Package Management**: npm workspaces
+- **Package Management**: npm (frontend) + pip (backend)
 
 ## 📁 Project Structure
 
@@ -18,9 +18,10 @@ legaltech-mvp/
 │   ├── src/
 │   ├── package.json
 │   └── ...
-├── backend/                  # Node.js backend API
-│   ├── src/
-│   ├── package.json
+├── backend/                  # Python FastAPI backend
+│   ├── app/
+│   ├── requirements.txt
+│   ├── pyproject.toml
 │   └── ...
 ├── docs/                     # Documentation
 ├── scripts/                  # Build and deployment scripts
@@ -34,15 +35,19 @@ legaltech-mvp/
 
 ### Prerequisites
 
-- **Node.js 18+** - [Download here](https://nodejs.org/)
+- **Python 3.9+** - [Download here](https://python.org/)
+- **pip** - Comes with Python
+- **Node.js 18+** - [Download here](https://nodejs.org/) (for frontend)
 - **npm 9+** - Comes with Node.js
 - **Git** - [Download here](https://git-scm.com/)
 
 **Verify installation:**
 ```bash
-node --version    # Should be 18.0.0 or higher
-npm --version     # Should be 9.0.0 or higher  
-git --version     # Any recent version
+python3 --version  # Should be 3.9.0 or higher
+pip --version      # Any recent version
+node --version     # Should be 18.0.0 or higher
+npm --version      # Should be 9.0.0 or higher  
+git --version      # Any recent version
 ```
 
 ### Installation
@@ -53,26 +58,77 @@ git --version     # Any recent version
    cd LegalTech
    ```
 
-2. **Install all dependencies**
+2. **Set up Python virtual environment**
    ```bash
-   npm run install:all
+   # Create virtual environment
+   python3 -m venv venv
+   
+   # Activate virtual environment
+   # On macOS/Linux:
+   source venv/bin/activate
+   # On Windows:
+   # venv\Scripts\activate
    ```
 
-3. **Start development servers**
+3. **Install all dependencies**
    ```bash
+   # Step 3a: Install root dependencies (contains scripts for running dev servers)
+   npm install
+   
+   # Step 3b: Install frontend dependencies  
+   cd frontend
+   npm install
+   cd ..
+   
+   # Step 3c: Install backend dependencies (ensure venv is activated first!)
+   cd backend
+   pip install -r requirements.txt
+   cd ..
+   ```
+
+4. **Start development servers** (run from LegalTech root directory)
+   
+   **Option A: Start both servers with one command (recommended for development)**
+   ```bash
+   # From LegalTech root directory:
    npm run dev
    ```
-   This starts both frontend (http://localhost:5173) and backend (http://localhost:3000) concurrently.
+   This starts both frontend (http://localhost:5173) and backend (http://localhost:8000) concurrently.
 
-4. **Verify everything works**
+   **Option B: Start servers individually (recommended for focused development)**
+   ```bash
+   # Terminal 1 - From LegalTech root directory:
+   npm run dev:frontend   # Runs on http://localhost:5173
+   
+   # Terminal 2 - From LegalTech root directory (ensure venv is activated):
+   npm run dev:backend    # Runs on http://localhost:8000
+   ```
+
+5. **Verify everything works**
    - Open http://localhost:5173 in your browser
    - You should see the LegalTech MVP homepage
    - Check that "Backend API: ✅ Connected" appears on the page
+   - Visit http://localhost:8000/docs for interactive API documentation
 
-### Individual Commands
+### Development Notes
 
-- **Frontend only**: `npm run dev:frontend`
-- **Backend only**: `npm run dev:backend`
+**Why three separate npm install commands?**
+- **Root `npm install`**: Installs `concurrently` package needed for `npm run dev` command
+- **Frontend `npm install`**: Installs React, Vite, TypeScript and frontend dependencies  
+- **Backend `pip install`**: Installs Python FastAPI, PyPDF2, and legal processing libraries
+
+**Why these ports?**
+- **Frontend (5173)**: Vite's default port, optimized for fast HMR (Hot Module Replacement)
+- **Backend (8000)**: FastAPI's conventional port, separate from frontend for clear API boundary
+
+**Why virtual environment?**
+- **Isolation**: Prevents Python package conflicts with your system
+- **Reproducibility**: Ensures consistent dependencies across different machines
+- **Best Practice**: Industry standard for Python development
+
+**Single vs Individual Commands:**
+- **`npm run dev`**: Convenient for full-stack development, sees both frontend and backend logs
+- **Individual commands**: Better for focused development, cleaner logs, easier debugging
 
 ## 📜 Available Scripts
 
@@ -85,7 +141,8 @@ git --version     # Any recent version
 | `npm run test` | Run tests for both applications |
 | `npm run lint` | Lint code in both applications |
 | `npm run typecheck` | Type check both applications |
-| `npm run install:all` | Install dependencies for all packages |
+| `npm run setup:venv` | Create Python virtual environment |
+| `npm run install:all` | Install frontend dependencies (backend requires venv) |
 | `npm run clean` | Remove all node_modules and build outputs |
 
 ### Frontend Commands (in `frontend/` directory)
@@ -99,16 +156,18 @@ git --version     # Any recent version
 | `npm run lint` | Lint TypeScript and React code |
 | `npm run typecheck` | Type check without emitting files |
 
-### Backend Commands (in `backend/` directory)
+### Backend Commands (in `backend/` directory, with venv activated)
 
 | Command | Description |
 |---------|-------------|
-| `npm run dev` | Start development server with nodemon |
-| `npm run build` | Compile TypeScript to JavaScript |
-| `npm start` | Start production server |
-| `npm test` | Run tests with Jest |
-| `npm run lint` | Lint TypeScript code |
-| `npm run typecheck` | Type check without emitting files |
+| `python3 -m uvicorn app.main:app --reload` | Start development server with auto-reload |
+| `pip install -r requirements.txt` | Install Python dependencies |
+| `python3 -m pytest` | Run tests with pytest |
+| `python3 -m black .` | Format code with Black |
+| `python3 -m flake8 .` | Lint Python code |
+| `python3 -m mypy .` | Type check Python code |
+
+**Note**: Always activate the virtual environment first: `source venv/bin/activate`
 
 ## 🔄 CI/CD Pipeline
 
@@ -143,15 +202,16 @@ git --version     # Any recent version
 - **Code Quality**: ESLint, Prettier
 
 ### Backend
-- **Runtime**: Node.js
-- **Framework**: Express.js
-- **Language**: TypeScript
-- **Database**: MongoDB (Mongoose)
-- **Authentication**: JWT
-- **Validation**: Joi
-- **Security**: Helmet, CORS
-- **Testing**: Jest
-- **Code Quality**: ESLint, Prettier
+- **Runtime**: Python 3.9+
+- **Framework**: FastAPI
+- **Language**: Python with Type Hints
+- **Database**: SQLAlchemy (PostgreSQL/SQLite)
+- **Authentication**: JWT with passlib
+- **Validation**: Pydantic
+- **Security**: Built-in FastAPI security, CORS
+- **Testing**: pytest
+- **Code Quality**: Black, Flake8, MyPy
+- **Legal Processing**: PyPDF2, python-docx, spaCy, NLTK
 
 ## 🔧 Development Workflow
 
@@ -203,16 +263,22 @@ git --version     # Any recent version
 
 ### Backend (.env)
 ```env
-NODE_ENV=development
-PORT=3000
-MONGODB_URI=mongodb://localhost:27017/legaltech
-JWT_SECRET=your_jwt_secret_here
-JWT_EXPIRES_IN=7d
+ENVIRONMENT=development
+PORT=8000
+HOST=0.0.0.0
+DATABASE_URL=sqlite:///./legaltech.db
+SECRET_KEY=your_super_secret_key_here
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+ALLOWED_ORIGINS=["http://localhost:5173"]
+LOG_LEVEL=info
+MAX_FILE_SIZE=10485760
+UPLOAD_DIR=./uploads
 ```
 
 ### Frontend (.env)
 ```env
-VITE_API_URL=http://localhost:3000/api
+VITE_API_URL=http://localhost:8000/api
 VITE_APP_NAME=LegalTech MVP
 ```
 
