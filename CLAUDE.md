@@ -4,6 +4,10 @@ This document provides comprehensive guidelines for managing the LegalTech MVP c
 
 ---
 
+# General Note:
+Always refer to the documentations like Readme and docs/ before advising
+
+
 # 1. CODE MANAGEMENT
 
 ## 🔄 End-to-End Workflow: Document → Code → Deploy

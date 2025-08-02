@@ -19,13 +19,13 @@ function App() {
     const testApiConnection = async () => {
       try {
         // Test health endpoint
-        const healthResponse = await fetch('http://localhost:3000/health');
+        const healthResponse = await fetch('http://localhost:8000/health');
         if (healthResponse.ok) {
           const healthData = await healthResponse.json();
           setApiStatus('✅ Connected');
           
           // Get API info
-          const apiResponse = await fetch('http://localhost:3000/api');
+          const apiResponse = await fetch('http://localhost:8000/api');
           const apiInfo = await apiResponse.json();
           setApiData(apiInfo);
         } else {
