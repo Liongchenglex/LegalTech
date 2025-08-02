@@ -34,15 +34,22 @@ legaltech-mvp/
 
 ### Prerequisites
 
-- Node.js 18+ 
-- npm 9+
-- Git
+- **Node.js 18+** - [Download here](https://nodejs.org/)
+- **npm 9+** - Comes with Node.js
+- **Git** - [Download here](https://git-scm.com/)
+
+**Verify installation:**
+```bash
+node --version    # Should be 18.0.0 or higher
+npm --version     # Should be 9.0.0 or higher  
+git --version     # Any recent version
+```
 
 ### Installation
 
 1. **Clone the repository**
    ```bash
-   git clone <your-repo-url>
+   git clone https://github.com/Liongchenglex/LegalTech.git
    cd LegalTech
    ```
 
@@ -56,6 +63,11 @@ legaltech-mvp/
    npm run dev
    ```
    This starts both frontend (http://localhost:5173) and backend (http://localhost:3000) concurrently.
+
+4. **Verify everything works**
+   - Open http://localhost:5173 in your browser
+   - You should see the LegalTech MVP homepage
+   - Check that "Backend API: ✅ Connected" appears on the page
 
 ### Individual Commands
 
